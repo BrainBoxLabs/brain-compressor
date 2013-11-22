@@ -11,6 +11,11 @@ if(isset($_GET['path'])){
     echo 'please provide a ?path= query string on the request string.';exit;
 }
 
+$log = false;
+if(isset($_GET['log'])){
+    $log = true;
+}
+
 $debug = false;
 if(isset($_GET['debug'])){
     $debug = true;
@@ -41,17 +46,35 @@ if(count($load_first) > 0 && $load_first[0] != ''){
 
 $production = '';
 $code = '';
-foreach($js_files as $js_file){
 
-    if($debug){
-        $debug_code = 'console.log("script loaded: '.$js_file.'");'."\n\n";
+if($debug){
+
+    foreach($js_files as $js_file){
+
+        if($log){
+            $debug_code = 'console.log("script loaded: '.$js_file.'");'."\n\n";
+        }
+
+        $this_code = trim(file_get_contents($js_file))."\n\n";
+        $production .= $this_code;
+
+        $code .= $debug_code.$this_code;
     }
 
-    $this_code = trim(file_get_contents($js_file))."\n\n";
-    $production .= $this_code;
+}else{
 
-    $code .= $debug_code.$this_code;
+    include $base_path.'YUICompressor.php';
 
+    $yui = new YUICompressor($base_path.'yuicompressor-2.4.8.jar',$base_path.'tmp/',array(
+        'linebreak' => 1000
+    ));
+
+    foreach($js_files as $js_file){
+        $yui->addFile($js_file);
+    }
+
+    $code = $yui->compress();
+    $production = $code;
 }
 
 file_put_contents($base_path.'production/main.js',$production);
