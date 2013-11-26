@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="myapp">
 <head>
     <meta charset="utf-8">
     <title></title>
@@ -8,7 +8,14 @@
 </head>
 <body>
     <h1>Hello World</h1>
-    <!--<script src="brain/compressor.php?path=../app/"></script>-->
-    <script src="brain/combine.php?path=../app/&load_first=/services/&debug=true&log=true"></script>
+    <form ng-controller="FooController">
+        <label>
+            Enter your name
+        </label>
+        <input type="text" name="first_name" ng-model="first_name"  />
+        <button type="button" ng-click="buttonPressed()">Try it!</button>
+    </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js"></script>
+    <script src="brain/combine.php?path=../app/&load_first=/services/,/directives/&debug=true&log=true"></script>
 </body>
 </html>

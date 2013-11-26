@@ -1,1 +1,0 @@
-var services2 = 'services2';
