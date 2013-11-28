@@ -17,7 +17,11 @@
  * only (optional)
  * Instead of loading all files from a given directory, turning on only will only include the comma separated list provided.
  * eg. &only=../js/jquery.js,../js/bootstrap.js
+ *
+ * css (optional)
+ * load css files instead of js.
  */
+
 $base_path = dirname(__FILE__).'/';
 
 include $base_path.'functions.php';
@@ -50,8 +54,15 @@ if(isset($_GET['only'])){
     $only = explode(',',$_GET['only']);
 }
 
+$ext = '*.js';
+if(isset($_GET['css'])){
+    $ext = '*.css';
+}
+
 if(count($only) < 1){
-    $js_files = glob_recursive($base_path.$js_path.'*.js');
+
+
+    $js_files = glob_recursive($base_path.$js_path.$ext);
     if(count($load_first) > 0 && $load_first[0] != ''){
         $load_first_js_files = array();
         $load_whenever = array();
@@ -70,7 +81,7 @@ if(count($only) < 1){
 }else{
     $js_files = array();
     foreach($only as $o){
-        $o = $base_path.$o;
+        $o = $base_path.$js_path.$o;
         if(is_file($o)){
             $js_files[] = $o;
         }
@@ -85,7 +96,11 @@ if($debug){
     foreach($js_files as $js_file){
 
         if($log){
-            $debug_code = 'console.log("script loaded: '.$js_file.'");'."\n\n";
+            if(!isset($_GET['css'])){
+                $debug_code = 'console.log("script loaded: '.$js_file.'");'."\n\n";
+            }else{
+                $debug_code = '/* @ScriptLoaded: '.$js_file.' */'."\n\n";
+            }
         }
 
         $this_code = trim(file_get_contents($js_file))."\n\n";
@@ -98,8 +113,14 @@ if($debug){
 
     include $base_path.'YUICompressor.php';
 
+    $type = 'js';
+    if(isset($_GET['css'])){
+        $type = 'css';
+    }
+
     $yui = new YUICompressor($base_path.'yuicompressor-2.4.8.jar',$base_path.'tmp/',array(
-        'linebreak' => 1000
+        'linebreak' => 1000,
+        'type' => $type,
     ));
 
     foreach($js_files as $js_file){
@@ -112,5 +133,10 @@ if($debug){
 
 file_put_contents($base_path.'production/main.js',$production);
 
-header("content-type: application/javascript");
+if(!isset($_GET['css'])){
+    header("content-type: application/javascript");
+}else{
+    header("content-type: text/css");
+}
+
 echo $code;
