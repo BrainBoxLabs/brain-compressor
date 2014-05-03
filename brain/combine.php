@@ -90,6 +90,7 @@ if(count($only) < 1){
 
 $production = '';
 $code = '';
+$debug_code = '';
 
 if($debug){
 
@@ -131,11 +132,17 @@ if($debug){
     $production = $code;
 }
 
-file_put_contents($base_path.'production/main.js',$production);
+if(isset($_GET['filename'])){
+    $filename = $_GET['filename'];
+}else{
+    $filename = 'build.js';
+}
 
 if(!isset($_GET['css'])){
+    file_put_contents($base_path.'production/'.$filename,$production);
     header("content-type: application/javascript");
 }else{
+    file_put_contents($base_path.'production/build.css',$production);
     header("content-type: text/css");
 }
 
